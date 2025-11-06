@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="book-detail">
+    <div class="book-detail-header">
+      {% if book.cover %}
+        <img src="{{ book.cover.url }}" alt="{{ book.title }}" class="detail-cover">
+      {% else %}
+        <div class="detail-cover-placeholder">📖</div>
+      {% endif %}
+      
+      <div class="book-info">
+        <h1>{{ book.title }}</h1>
+        <h3>by {{ book.author }}</h3>
+        
+        <div class="badges">
+          {% if book.category %}
+            <span class="badge badge-category">{{ book.category.name }}</span>
+          {% endif %}
+          <span class="badge {% if book.access_type == 'free' %}badge-free{% else %}badge-restricted{% endif %}">
+            {{ book.get_access_type_display }}
+          </span>
+        </div>
+        
+        <p class="downloads-count">Downloaded {{ book.downloads }} times</p>
+        
+        <div class="action-buttons">
+          {% if user.is_authenticated %}
+            {% if can_download %}
+              <a href="{% url 'download_book' book.pk %}" class="btn btn-primary">⬇️ Download PDF</a>
+            {% elif existing_request %}
+              <p class="status-badge status-{{ existing_request.status }}">
+                Access Request: {{ existing_request.get_status_display }}
+              </p>
+              {% if existing_request.status == 'pending' %}
+                <small>Your request is being reviewed by admin.</small>
+              {% elif existing_request.status == 'denied' %}
+                <small>Your request was denied.</small>
+              {% endif %}
+            {% elif book.access_type == 'restricted' %}
+              <a href="{% url 'request_access' book.pk %}" class="btn btn-secondary">🔒 Request Access</a>
+            {% endif %}
+          {% else %}
+            <p><a href="/accounts/login/?next={{ request.path }}">Login</a> to download this book.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="book-description">
+      <h3>Description</h3>
+      <p>{{ book.description|linebreaks }}</p>
+    </div>
+    
+    <a href="/" class="back-link">← Back to browse</a>
+  </div>
+{% endblock %}

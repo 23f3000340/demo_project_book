@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>My Dashboard</h1>
+  
+  <section class="dashboard-section">
+    <h2>My Access Requests</h2>
+    {% if access_requests %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Book</th>
+            <th>Status</th>
+            <th>Requested</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in access_requests %}
+            <tr>
+              <td>
+                <a href="{% url 'book_detail' req.book.pk %}">{{ req.book.title }}</a>
+                <br><small>by {{ req.book.author }}</small>
+              </td>
+              <td>
+                <span class="status-badge status-{{ req.status }}">
+                  {{ req.get_status_display }}
+                </span>
+              </td>
+              <td>{{ req.created_at|date:"M d, Y" }}</td>
+              <td>
+                {% if req.status == 'approved' %}
+                  <a href="{% url 'download_book' req.book.pk %}" class="btn-small">Download</a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No access requests yet.</p>
+    {% endif %}
+  </section>
+  
+  <section class="dashboard-section">
+    <h2>Books I Can Download</h2>
+    {% if approved_books %}
+      <div class="grid">
+        {% for book in approved_books %}
+          <article class="card">
+            {% if book.cover %}
+              <img src="{{ book.cover.url }}" alt="{{ book.title }}" class="book-cover">
+            {% else %}
+              <div class="book-cover-placeholder">📖</div>
+            {% endif %}
+            
+            <h3 class="card-title"><a href="{% url 'book_detail' book.pk %}">{{ book.title }}</a></h3>
+            <p class="card-meta">by {{ book.author }}</p>
+            
+            <div class="card-footer">
+              <a href="{% url 'download_book' book.pk %}" class="btn-small">Download</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No books available for download yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

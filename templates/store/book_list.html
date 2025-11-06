@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="search-row">
+    <form method="get" action="" class="search-form">
+      <input name="q" placeholder="Search title, author, or description" value="{{ q }}" class="search-input">
+      
+      <select name="access" class="filter-select">
+        <option value="">All Books</option>
+        <option value="free" {% if access_filter == 'free' %}selected{% endif %}>Free</option>
+        <option value="restricted" {% if access_filter == 'restricted' %}selected{% endif %}>Restricted</option>
+      </select>
+      
+      <select name="category" class="filter-select">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.slug }}" {% if category_filter == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+      
+      <button type="submit" class="btn">Search</button>
+    </form>
+  </div>
+
+  <div class="grid">
+    {% for book in page_obj.object_list %}
+      <article class="card">
+        {% if book.cover %}
+          <img src="{{ book.cover.url }}" alt="{{ book.title }}" class="book-cover">
+        {% else %}
+          <div class="book-cover-placeholder">📖</div>
+        {% endif %}
+        
+        <h3 class="card-title"><a href="{% url 'book_detail' book.pk %}">{{ book.title }}</a></h3>
+        <p class="card-meta">by {{ book.author }}</p>
+        
+        {% if book.category %}
+          <span class="badge badge-category">{{ book.category.name }}</span>
+        {% endif %}
+        
+        <span class="badge {% if book.access_type == 'free' %}badge-free{% else %}badge-restricted{% endif %}">
+          {{ book.get_access_type_display }}
+        </span>
+        
+        <p class="card-desc">{{ book.description|truncatechars:100 }}</p>
+        
+        <div class="card-footer">
+          <span class="downloads">⬇️ {{ book.downloads }}</span>
+          <a href="{% url 'book_detail' book.pk %}" class="btn-small">View</a>
+        </div>
+      </article>
+    {% empty %}
+      <p>No books found.</p>
+    {% endfor %}
+  </div>
+
+  <nav class="pagination">
+    {% if page_obj.has_previous %}
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&access={{ access_filter }}&category={{ category_filter }}">← Previous</a>
+    {% endif %}
+
+    <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&access={{ access_filter }}&category={{ category_filter }}">Next →</a>
+    {% endif %}
+  </nav>
+{% endblock %}

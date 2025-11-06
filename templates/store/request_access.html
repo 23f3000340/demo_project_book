@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="form-container">
+    <h2>Request Access to "{{ book.title }}"</h2>
+    <p>This book is restricted. Submit a request and an admin will review it.</p>
+    
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Submit Request</button>
+      <a href="{% url 'book_detail' book.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}
